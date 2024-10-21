@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leetcode Problem Set</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: #121212;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+      }
+
+      .root {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #181818; /* Slightly lighter background for contrast */
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .search-container {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 10px 20px;
+        border: 1px solid #444;
+        border-radius: 20px;
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        font-size: 1em;
+        outline: none;
+      }
+
+      .search-input:focus {
+        border-color: #ffffff20;
+        box-shadow: 0 0 8px #ffffff20;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-evenly;
+        margin-bottom: 20px;
+      }
+
+      span {
+        margin-right: 8px;
+        color: #ffffff;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 20px;
+        border: 1px solid #444;
+        cursor: pointer;
+        border-color: 1px solid #333;
+        background-color: #1e1e1e;
+        transition: background-color 0.3s ease;
+      }
+
+      span:hover {
+        background-color: #333;
+        box-shadow: #ffffff20 0 0 8px;
+      }
+
+      .card {
+        border: 1px solid #444;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        width: 100%;
+        background-color: #202020;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 1.4em;
+        color: #f0f0f0;
+      }
+
+      .card p {
+        margin: 4px 0;
+        color: #cccccc;
+        font-size: 0.9em;
+      }
+
+      .box1 {
+        flex: 1;
+      }
+
+      .center {
+        text-align: center;
+      }
+
+      .box2 {
+        flex: 3;
+      }
+
+      .symbol {
+        font-size: 3em;
+        color: #00ff88;
+      }
+
+      .Medium {
+        border-color: #de89006f;
+        box-shadow: 0 0 8px #de89006f;
+        background-color: #de890010;
+      }
+      .Easy {
+        border-color: #00ffaa43;
+        box-shadow: 0 0 8px #00ffaa43;
+        background-color: #00ffaa10;
+      }
+      .Hard {
+        border-color: #d0000053;
+        box-shadow: 0 0 8px #d0000053;
+        background-color: #d0000010;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="search-container">
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Search for a problem..."
+        />
+      </div>
+      <div class="row">
+        <span id="total">Total: 0</span>
+        <span id="complete">Completed: 0</span>
+        <span id="incomplete">Incomplete: 0</span>
+        <span id="Easy">Easy</span>
+        <span id="Medium">Medium</span>
+        <span id="Hard">Hard</span>
+      </div>
+      <div id="card-container"></div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        get,
+        set,
+        child,
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCpjPf-WZkRWfJxSadQZwO8hP66ZmIDgdA",
+        authDomain: "leetcode-problem-set.firebaseapp.com",
+        projectId: "leetcode-problem-set",
+        storageBucket: "leetcode-problem-set.appspot.com",
+        messagingSenderId: "969813846145",
+        appId: "1:969813846145:web:d2166c41f873a512bc0580",
+        measurementId: "G-N1DCQDDSMT",
+        databaseURL:
+          "https://leetcode-problem-set-default-rtdb.firebaseio.com/",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+
+      let originalData = [];
+
+      function displayCards(data) {
+        const container = document.getElementById("card-container");
+        container.innerHTML = "";
+        data.forEach((question) => {
+          const videoCompleted = question?.videoCompleted || false;
+          const card = document.createElement("div");
+          card.classList.add("card");
+          card.classList.add(question.difficulty);
+          card.innerHTML = `
+            <div class="box1">
+              <p id="checkbox-${
+                question.frontendQuestionId
+              }" class="symbol center">${
+            videoCompleted ? "⭐️ ⭐️ ⭐️ ⭐️ ⭐️" : "❌ ❌ ❌ ❌ ❌"
+          }</p>
+            </div>
+              <div class="box2">
+                <h3>${question.title}</h3>
+              </div>
+              <div class="box1">
+                <p><strong>Difficulty:</strong> ${question.difficulty}</p>
+              </div>
+            `;
+          container.appendChild(card);
+
+          const checkbox = document.getElementById(
+            `checkbox-${question.frontendQuestionId}`
+          );
+          checkbox.addEventListener("click", function () {
+            console.log(
+              "Toggling video status for question",
+              question.frontendQuestionId
+            );
+            toggleVideoCompleted(question.frontendQuestionId, videoCompleted);
+          });
+        });
+      }
+
+      function toggleVideoCompleted(questionId, currentStatus) {
+        const dbRef = ref(database, `questions/${questionId - 1}`);
+
+        get(dbRef)
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const questionData = snapshot.val();
+              const newStatus = !currentStatus;
+              questionData.videoCompleted = newStatus;
+
+              set(dbRef, questionData)
+                .then(() => {
+                  console.log(
+                    `Marked as ${
+                      newStatus ? "Done" : "Incomplete"
+                    } for question ${questionId}`
+                  );
+                  fetchAllDataFromFirebase();
+                })
+                .catch((error) => {
+                  console.error("Error updating data:", error);
+                });
+            } else {
+              console.log(`No data found for question ${questionId}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+      }
+
+      function setMetrices(data) {
+        const totalQuestions = data.length;
+        const completedQuestions = data.filter(
+          (question) => question.videoCompleted
+        ).length;
+        const incompleteQuestions = totalQuestions - completedQuestions;
+
+        document.getElementById("total").innerText = `Total: ${totalQuestions}`;
+        document.getElementById(
+          "complete"
+        ).innerText = `Completed: ${completedQuestions}`;
+        document.getElementById(
+          "incomplete"
+        ).innerText = `Incomplete: ${incompleteQuestions}`;
+      }
+
+      async function fetchAllDataFromFirebase() {
+        const dbRef = ref(database);
+        try {
+          const snapshot = await get(child(dbRef, "questions"));
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            originalData = data;
+            setMetrices(data);
+            displayCards(data);
+            return;
+          } else {
+            console.log("No data available");
+            return null;
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      function filterCards() {
+        const searchTerm = document
+          .getElementById("search-input")
+          .value.toLowerCase();
+
+        const filteredData = originalData.filter((question) =>
+          question.title.toLowerCase().includes(searchTerm)
+        );
+        displayCards(filteredData);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("search-input")
+          .addEventListener("input", filterCards);
+
+        document.getElementById("Easy").addEventListener("click", function () {
+          const filteredData = originalData.filter(
+            (question) => question.difficulty === "Easy"
+          );
+          displayCards(filteredData);
+        });
+        document
+          .getElementById("Medium")
+          .addEventListener("click", function () {
+            const filteredData = originalData.filter(
+              (question) => question.difficulty === "Medium"
+            );
+            displayCards(filteredData);
+          });
+        document.getElementById("Hard").addEventListener("click", function () {
+          const filteredData = originalData.filter(
+            (question) => question.difficulty === "Hard"
+          );
+          displayCards(filteredData);
+        });
+        document.getElementById("total").addEventListener("click", function () {
+          displayCards(originalData);
+        });
+        document
+          .getElementById("complete")
+          .addEventListener("click", function () {
+            const filteredData = originalData.filter(
+              (question) => question.videoCompleted
+            );
+            displayCards(filteredData);
+          });
+        document
+          .getElementById("incomplete")
+          .addEventListener("click", function () {
+            const filteredData = originalData.filter(
+              (question) => !question.videoCompleted
+            );
+            displayCards(filteredData);
+          });
+
+        fetchAllDataFromFirebase();
+      });
+    </script>
+  </body>
+</html>
