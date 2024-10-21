@@ -11,6 +11,17 @@
         padding: 0;
         box-sizing: border-box;
       }
+      #clear-button {
+        width: 50px;
+        border: 1px solid #444;
+        border-radius: 20px;
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        font-size: 1em;
+        outline: none;
+        cursor: pointer;
+        margin-left: 10px;
+      }
       body {
         background-color: #121212;
         color: #ffffff;
@@ -113,12 +124,11 @@
       }
 
       .box2 {
-        flex: 3;
+        flex: 7;
       }
 
       .symbol {
-        font-size: 3em;
-        color: #00ff88;
+        cursor: pointer;
       }
 
       .Medium {
@@ -148,6 +158,7 @@
           class="search-input"
           placeholder="Search for a problem..."
         />
+        <button id="clear-button">X</button>
       </div>
       <div class="row">
         <span id="total">Total: 0</span>
@@ -205,9 +216,6 @@
             </div>
               <div class="box2">
                 <h3>${question.title}</h3>
-              </div>
-              <div class="box1">
-                <p><strong>Difficulty:</strong> ${question.difficulty}</p>
               </div>
             `;
           container.appendChild(card);
@@ -345,6 +353,13 @@
               (question) => !question.videoCompleted
             );
             displayCards(filteredData);
+          });
+
+        document
+          .getElementById("clear-button")
+          .addEventListener("click", function () {
+            document.getElementById("search-input").value = "";
+            filterCards();
           });
 
         fetchAllDataFromFirebase();
