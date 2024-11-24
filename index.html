@@ -215,7 +215,11 @@
           }</p>
             </div>
               <div class="box2">
+                <a href="https://leetcode.com/problems/${
+                  question.titleSlug
+                }" target="_blank" style="text-decoration: none;">
                 <h3>${question.title}</h3>
+                </a>
               </div>
             `;
           container.appendChild(card);
@@ -265,11 +269,21 @@
       }
 
       function setMetrices(data) {
-        const totalQuestions = data.length;
-        const completedQuestions = data.filter(
-          (question) => question.videoCompleted
+        const totalQuestions = data.filter(
+          (question) => question.paidOnly === false
         ).length;
+        const completed = data.filter((question) => question.videoCompleted);
+        console.log(completed);
+        const completedQuestions = completed.length;
         const incompleteQuestions = totalQuestions - completedQuestions;
+        let easy = 0,
+          medium = 0,
+          hard = 0;
+        completed.forEach((ele) => {
+          if (ele.difficulty === "Easy") easy++;
+          else if (ele.difficulty === "Medium") medium++;
+          else hard++;
+        });
 
         document.getElementById("total").innerText = `Total: ${totalQuestions}`;
         document.getElementById(
@@ -278,6 +292,9 @@
         document.getElementById(
           "incomplete"
         ).innerText = `Incomplete: ${incompleteQuestions}`;
+        document.getElementById("Easy").innerText = `Easy: ${easy}`;
+        document.getElementById("Medium").innerText = `Medium: ${medium}`;
+        document.getElementById("Hard").innerText = `Hard: ${hard}`;
       }
 
       async function fetchAllDataFromFirebase() {
